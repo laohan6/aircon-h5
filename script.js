@@ -18,18 +18,6 @@ const modeLabels = {
   auto: "自动",
 };
 
-const fanLabels = {
-  1: "低风",
-  2: "中风",
-  3: "高风",
-};
-
-const fanAudio = {
-  1: { frequency: 64, volume: 0.003 },
-  2: { frequency: 76, volume: 0.005 },
-  3: { frequency: 92, volume: 0.008 },
-};
-
 const RUNNING_LOOP_START = 4;
 const LOOP_GUARD_SECONDS = 0.18;
 const runningVolumes = {
@@ -239,8 +227,6 @@ function updateUi() {
   modeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.mode === currentMode);
   });
-
-  updateHum();
 }
 
 function setTemperature(value) {
