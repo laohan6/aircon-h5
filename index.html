@@ -3,97 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>智能空调 H5 控制面板</title>
+    <title>饭饭小窝的空调</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="app-shell" data-power="off" data-mode="cool">
-      <section class="scene" aria-label="空调演示">
-        <div class="ambient ambient-one"></div>
-        <div class="ambient ambient-two"></div>
-
+    <main class="app-shell" data-power="off" data-mode="cool" data-fan="2">
+      <section class="hero" aria-label="空调预览">
         <div class="ac-unit" aria-live="polite">
-          <div class="ac-topline"></div>
-          <div class="display">
-            <span class="status-dot"></span>
-            <span id="displayMode">待机</span>
-            <strong><span id="displayTemp">24</span>°C</strong>
+          <div class="body-shine"></div>
+          <div class="brand-mark">mi</div>
+          <div class="display" aria-label="空调状态显示">
+            <span id="displayTemp">24</span>
+            <small>°C</small>
+            <em id="displayMode">待机</em>
           </div>
-          <div class="brand">AURORA AIR</div>
-          <div class="vent">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
+          <div class="lower-lip">
+            <span class="side-cap left"></span>
+            <span class="vent-slit"></span>
+            <span class="side-cap right"></span>
           </div>
+          <div class="vent-cavity" aria-hidden="true">
+            <span class="divider"></span>
+            <span class="divider"></span>
+            <span class="divider"></span>
+            <span class="divider"></span>
+            <span class="divider"></span>
+            <span class="blade"></span>
+            <span class="blade"></span>
+          </div>
+          <div class="swing-louver" aria-hidden="true"></div>
           <div class="airflow" aria-hidden="true">
             <i></i>
             <i></i>
             <i></i>
             <i></i>
             <i></i>
-            <i></i>
           </div>
-          <div class="effect-layer" aria-hidden="true">
-            <span class="flake"></span>
-            <span class="flake"></span>
-            <span class="flake"></span>
-            <span class="heat-wave"></span>
-            <span class="heat-wave"></span>
-            <span class="drop"></span>
-            <span class="drop"></span>
+          <div class="mode-effect" aria-hidden="true">
+            <span class="cool-dot"></span>
+            <span class="cool-dot"></span>
+            <span class="warm-wave"></span>
+            <span class="dry-drop"></span>
             <span class="fan-ring"></span>
+            <span class="fan-pulse"></span>
+            <span class="auto-orbit"></span>
+            <span class="auto-orbit"></span>
+            <span class="auto-orbit"></span>
           </div>
         </div>
       </section>
 
-      <section class="panel" aria-label="空调操作面板">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">Smart Climate</p>
-            <h1>空调控制</h1>
+      <section class="panel compact-panel" aria-label="空调控制面板">
+        <div class="panel-status">
+          <div class="status-indicator" aria-hidden="true">
+            <span class="status-light"></span>
+            <span class="status-bars"><i></i><i></i><i></i></span>
           </div>
-          <button class="power-button" id="powerButton" type="button" aria-pressed="false">
-            <span class="power-icon"></span>
+          <button class="power-button" id="powerButton" type="button" aria-pressed="false" aria-label="开关空调">
+            <span></span>
           </button>
         </div>
 
-        <div class="readout">
-          <span id="stateText">设备已关闭</span>
-          <strong><span id="panelTemp">24</span>°</strong>
-        </div>
-
-        <div class="temperature-control" aria-label="温度控制">
-          <button id="tempDown" type="button" aria-label="降低温度">−</button>
-          <input id="tempRange" type="range" min="16" max="30" value="24" />
+        <div class="temperature-row" aria-label="温度控制">
+          <button id="tempDown" type="button" aria-label="降低温度">-</button>
+          <div class="temperature-value"><span id="panelTemp">24</span><small>°C</small></div>
           <button id="tempUp" type="button" aria-label="升高温度">+</button>
         </div>
 
-        <div class="mode-grid" aria-label="模式切换">
-          <button class="mode-button active" type="button" data-mode="cool">
-            <span>❄</span>
-            <strong>制冷</strong>
-          </button>
-          <button class="mode-button" type="button" data-mode="heat">
-            <span>☀</span>
-            <strong>制热</strong>
-          </button>
-          <button class="mode-button" type="button" data-mode="dry">
-            <span>◌</span>
-            <strong>除湿</strong>
-          </button>
-          <button class="mode-button" type="button" data-mode="fan">
-            <span>✦</span>
-            <strong>送风</strong>
-          </button>
-          <button class="mode-button" type="button" data-mode="auto">
-            <span>A</span>
-            <strong>自动</strong>
-          </button>
+        <input id="tempRange" type="range" min="16" max="30" value="24" aria-label="温度滑块" />
+
+        <div class="fan-control" aria-label="风量控制">
+          <div class="fan-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+          <input id="fanRange" type="range" min="1" max="3" step="1" value="2" aria-label="风量大小" />
+        </div>
+
+        <div class="mode-tabs" aria-label="模式切换">
+          <button class="mode-button active" type="button" data-mode="cool" aria-label="制冷"><span>❄</span></button>
+          <button class="mode-button" type="button" data-mode="heat" aria-label="制热"><span>☀</span></button>
+          <button class="mode-button" type="button" data-mode="dry" aria-label="除湿"><span>◌</span></button>
+          <button class="mode-button" type="button" data-mode="fan" aria-label="送风"><span>✦</span></button>
+          <button class="mode-button" type="button" data-mode="auto" aria-label="自动"><span>A</span></button>
         </div>
       </section>
     </main>
 
+    <audio id="runningAudio" src="soundEffect/airConditioner.mp3" preload="auto"></audio>
     <script src="script.js"></script>
   </body>
 </html>
