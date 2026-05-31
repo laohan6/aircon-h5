@@ -21,9 +21,9 @@ const modeLabels = {
 const RUNNING_LOOP_START = 4;
 const LOOP_GUARD_SECONDS = 0.18;
 const runningVolumes = {
-  1: 0.055,
-  2: 0.085,
-  3: 0.12,
+  1: 0.018,
+  2: 0.03,
+  3: 0.045,
 };
 
 let audioContext;
@@ -34,7 +34,8 @@ let currentMode = "cool";
 let currentTemp = Number(tempRange.value);
 let currentFan = Number(fanRange.value);
 let hasPlayedSound = false;
-let runningFadeTimer = null;
+let runningFadeFrame = null;
+let runningStopTimer = null;
 let runningLoopReady = false;
 let isSeekingLoop = false;
 
@@ -94,29 +95,40 @@ function setRunningVolume(target, rampMs = 280) {
     return;
   }
 
-  if (runningFadeTimer) {
-    clearTimeout(runningFadeTimer);
-    runningFadeTimer = null;
+  if (runningFadeFrame) {
+    cancelAnimationFrame(runningFadeFrame);
+    runningFadeFrame = null;
   }
 
   const start = runningAudio.volume;
-  const end = Math.max(0, Math.min(0.22, target));
-  const steps = 12;
-  const stepMs = Math.max(16, Math.round(rampMs / steps));
-  let currentStep = 0;
+  const end = Math.max(0, Math.min(0.08, target));
+  const startedAt = performance.now();
 
-  const tick = () => {
-    currentStep += 1;
-    const t = currentStep / steps;
-    runningAudio.volume = start + (end - start) * t;
-    if (currentStep < steps) {
-      runningFadeTimer = setTimeout(tick, stepMs);
+  const tick = (now) => {
+    const progress = Math.min(1, (now - startedAt) / rampMs);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    runningAudio.volume = start + (end - start) * eased;
+    if (progress < 1) {
+      runningFadeFrame = requestAnimationFrame(tick);
     } else {
-      runningFadeTimer = null;
+      runningFadeFrame = null;
     }
   };
 
-  tick();
+  runningFadeFrame = requestAnimationFrame(tick);
+}
+
+function getRunningPlaybackRate() {
+  return currentFan === 1 ? 0.96 : currentFan === 2 ? 1 : 1.045;
+}
+
+function updateRunningAudio(rampMs = 240) {
+  if (!runningAudio || runningAudio.paused) {
+    return;
+  }
+
+  runningAudio.playbackRate = getRunningPlaybackRate();
+  setRunningVolume(runningVolumes[currentFan], rampMs);
 }
 
 async function startRunningSound(isStartup = false) {
@@ -124,22 +136,27 @@ async function startRunningSound(isStartup = false) {
     return;
   }
 
+  if (runningStopTimer) {
+    clearTimeout(runningStopTimer);
+    runningStopTimer = null;
+  }
+
   if (isStartup) {
     runningAudio.currentTime = 0;
     runningLoopReady = false;
-  } else if (runningAudio.currentTime < RUNNING_LOOP_START && runningLoopReady) {
+  } else if (runningAudio.paused && runningLoopReady) {
     runningAudio.currentTime = RUNNING_LOOP_START;
   }
 
   runningAudio.loop = false;
-  runningAudio.playbackRate = currentFan === 1 ? 0.96 : currentFan === 2 ? 1 : 1.04;
+  runningAudio.playbackRate = getRunningPlaybackRate();
   if (runningAudio.paused || isStartup) {
     runningAudio.volume = 0;
   }
 
   try {
     await runningAudio.play();
-    setRunningVolume(runningVolumes[currentFan], isStartup ? 700 : 240);
+    setRunningVolume(runningVolumes[currentFan], isStartup ? 1200 : 240);
   } catch {
     runningAudio.volume = 0;
   }
@@ -150,11 +167,16 @@ function stopRunningSound() {
     return;
   }
 
-  setRunningVolume(0, 180);
-  runningFadeTimer = setTimeout(() => {
+  setRunningVolume(0, 900);
+  if (runningStopTimer) {
+    clearTimeout(runningStopTimer);
+  }
+  runningStopTimer = setTimeout(() => {
     runningAudio.pause();
+    runningAudio.volume = 0;
     runningLoopReady = false;
-  }, 220);
+    runningStopTimer = null;
+  }, 960);
 }
 
 function playPowerBeep(volumeScale = 1) {
@@ -205,7 +227,7 @@ function playSound(type) {
     playTone(base, now, 0.045, 0.035, "sine");
     playTone(base + 130, now + 0.045, 0.05, 0.032, "sine");
     if (isPowerOn) {
-      startRunningSound();
+      updateRunningAudio(320);
     }
     return;
   }
@@ -240,6 +262,9 @@ function setFan(value) {
   fanRange.value = currentFan;
   if (!isPowerOn) {
     isPowerOn = true;
+    startRunningSound(true);
+  } else {
+    updateRunningAudio(320);
   }
   updateUi();
 }
