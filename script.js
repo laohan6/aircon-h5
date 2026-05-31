@@ -86,8 +86,19 @@ function playTone(frequency, startTime, duration, volume = 0.045, type = "sine")
 
 function vibrate(pattern = 18) {
   if ("vibrate" in navigator) {
+    navigator.vibrate(0);
     navigator.vibrate(pattern);
   }
+}
+
+function bindPressVibration(element, pattern = 24) {
+  if (!element) {
+    return;
+  }
+
+  element.addEventListener("pointerdown", () => {
+    vibrate(pattern);
+  });
 }
 
 function setRunningVolume(target, rampMs = 280) {
@@ -181,7 +192,7 @@ function stopRunningSound() {
 
 function playPowerBeep(volumeScale = 1) {
   const now = getSafeStartTime();
-  const volume = 0.045 * volumeScale;
+  const volume = 0.065 * volumeScale;
 
   playTone(1040, now, 0.09, volume, "sine");
   playTone(1560, now + 0.01, 0.035, volume * 0.28, "triangle");
@@ -189,7 +200,7 @@ function playPowerBeep(volumeScale = 1) {
 
 function playButtonClick(strength = 1) {
   const now = getSafeStartTime();
-  const volume = 0.03 * strength;
+  const volume = 0.048 * strength;
 
   playTone(740, now, 0.04, volume, "sine");
 }
@@ -199,40 +210,35 @@ function playSound(type) {
   hasPlayedSound = true;
 
   if (type === "power-on") {
-    vibrate([28, 18, 36]);
     playPowerBeep(firstSound ? 0.55 : 1);
     startRunningSound(true);
     return;
   }
 
   if (type === "power-off") {
-    vibrate([36, 18, 24]);
     playPowerBeep(firstSound ? 0.55 : 1);
     stopRunningSound();
     return;
   }
 
   if (type === "mode") {
-    vibrate([18, 12, 18]);
     const now = getSafeStartTime();
-    playTone(620, now, 0.045, 0.038, "sine");
-    playTone(920, now + 0.045, 0.055, 0.036, "sine");
+    playTone(620, now, 0.045, 0.056, "sine");
+    playTone(920, now + 0.045, 0.055, 0.052, "sine");
     return;
   }
 
   if (type === "fan") {
-    vibrate([14, 10, 22]);
     const now = getSafeStartTime();
     const base = 520 + currentFan * 90;
-    playTone(base, now, 0.045, 0.035, "sine");
-    playTone(base + 130, now + 0.045, 0.05, 0.032, "sine");
+    playTone(base, now, 0.045, 0.052, "sine");
+    playTone(base + 130, now + 0.045, 0.05, 0.048, "sine");
     if (isPowerOn) {
       updateRunningAudio(320);
     }
     return;
   }
 
-  vibrate(14);
   playButtonClick();
 }
 
@@ -304,6 +310,15 @@ tempDown.addEventListener("click", () => {
 tempUp.addEventListener("click", () => {
   playSound("tap");
   setTemperature(currentTemp + 1);
+});
+
+bindPressVibration(powerButton, [35, 20, 45]);
+bindPressVibration(tempDown, 28);
+bindPressVibration(tempUp, 28);
+bindPressVibration(tempRange, 18);
+bindPressVibration(fanRange, [22, 12, 28]);
+modeButtons.forEach((button) => {
+  bindPressVibration(button, [24, 14, 24]);
 });
 
 if (runningAudio) {
